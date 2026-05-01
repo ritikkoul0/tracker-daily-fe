@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { activityService } from '../services/api';
 import {
   BarChart,
@@ -19,7 +19,8 @@ const Analysis = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchAnalysis = useCallback(async () => {
+  useEffect(() => {
+    const fetchAnalysis = async () => {
     try {
       setLoading(true);
       let apiData;
@@ -79,11 +80,9 @@ const Analysis = () => {
     } finally {
       setLoading(false);
     }
-  }, [period]);
-
-  useEffect(() => {
+    
     fetchAnalysis();
-  }, [fetchAnalysis]);
+  }, [period]);
 
   if (loading) {
     return <div className="loading">Loading analysis...</div>;
