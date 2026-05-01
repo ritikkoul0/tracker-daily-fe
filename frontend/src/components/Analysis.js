@@ -20,6 +20,7 @@ const Analysis = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     const fetchAnalysis = async () => {
       try {
         setLoading(true);
