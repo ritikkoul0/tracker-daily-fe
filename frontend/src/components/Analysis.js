@@ -21,65 +21,66 @@ const Analysis = () => {
 
   useEffect(() => {
     const fetchAnalysis = async () => {
-    try {
-      setLoading(true);
-      let apiData;
-      
-      // Fetch appropriate data based on period
-      switch (period) {
-        case 'daily':
-          apiData = await activityService.getWeeklyAnalysis();
-          break;
-        case 'monthly':
-          apiData = await activityService.getYearlyAnalysis();
-          break;
-        case 'yearly':
-          // For yearly, we need all activities to group by year
-          const allActivities = await activityService.getAllActivities();
-          
-          // Calculate analysis from all activities
-          const maxSleep = 9;
-          let totalLearning = 0, totalSleep = 0, totalOffice = 0, totalWasted = 0;
-          
-          allActivities.forEach((activity) => {
-            const sleepHours = Math.min(activity.sleep_hours, maxSleep);
-            const usedHours = activity.learning_hours + sleepHours + activity.office_hours;
-            const wastedHours = Math.max(0, 24 - usedHours);
+      try {
+        setLoading(true);
+        let apiData;
+        
+        // Fetch appropriate data based on period
+        switch (period) {
+          case 'daily':
+            apiData = await activityService.getWeeklyAnalysis();
+            break;
+          case 'monthly':
+            apiData = await activityService.getYearlyAnalysis();
+            break;
+          case 'yearly':
+            // For yearly, we need all activities to group by year
+            const allActivities = await activityService.getAllActivities();
             
-            totalLearning += activity.learning_hours;
-            totalSleep += sleepHours;
-            totalOffice += activity.office_hours;
-            totalWasted += wastedHours;
-          });
-          
-          const days = allActivities.length || 1;
-          apiData = {
-            analysis: {
-              total_days: allActivities.length,
-              avg_learning_hours: totalLearning / days,
-              avg_sleep_hours: totalSleep / days,
-              avg_office_hours: totalOffice / days,
-              avg_wasted_hours: totalWasted / days,
-              total_learning: totalLearning,
-              total_sleep: totalSleep,
-              total_office: totalOffice,
-              total_wasted: totalWasted,
-            },
-            data: allActivities
-          };
-          break;
-        default:
-          apiData = await activityService.getWeeklyAnalysis();
+            // Calculate analysis from all activities
+            const maxSleep = 9;
+            let totalLearning = 0, totalSleep = 0, totalOffice = 0, totalWasted = 0;
+            
+            allActivities.forEach((activity) => {
+              const sleepHours = Math.min(activity.sleep_hours, maxSleep);
+              const usedHours = activity.learning_hours + sleepHours + activity.office_hours;
+              const wastedHours = Math.max(0, 24 - usedHours);
+              
+              totalLearning += activity.learning_hours;
+              totalSleep += sleepHours;
+              totalOffice += activity.office_hours;
+              totalWasted += wastedHours;
+            });
+            
+            const days = allActivities.length || 1;
+            apiData = {
+              analysis: {
+                total_days: allActivities.length,
+                avg_learning_hours: totalLearning / days,
+                avg_sleep_hours: totalSleep / days,
+                avg_office_hours: totalOffice / days,
+                avg_wasted_hours: totalWasted / days,
+                total_learning: totalLearning,
+                total_sleep: totalSleep,
+                total_office: totalOffice,
+                total_wasted: totalWasted,
+              },
+              data: allActivities
+            };
+            break;
+          default:
+            apiData = await activityService.getWeeklyAnalysis();
+        }
+        
+        setAnalysisData(apiData);
+        setError('');
+      } catch (err) {
+        setError('Failed to fetch analysis data');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      
-      setAnalysisData(apiData);
-      setError('');
-    } catch (err) {
-      setError('Failed to fetch analysis data');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    };
     
     fetchAnalysis();
   }, [period]);
